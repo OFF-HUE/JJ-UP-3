@@ -1,0 +1,699 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Jj Up</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Figtree:wght@400;500;600&display=swap">
+<style>
+/* Layout: split auth screen (pitch + card), then a tabbed app under a sticky bar. Blue sky accent, sun-yellow for money. */
+:root{
+  --bg:#F2F5F7; --surface:#FFFFFF; --ink:#0F1D2B; --muted:#5A6B7B; --line:#D9E1E8;
+  --accent:#1F5FD6; --on-accent:#FFFFFF; --soft:#E6EEFB;
+  --sun:#F0B429; --on-sun:#2B2100;
+  --good:#17803D; --good-bg:#E3F4E9; --warn:#8A5200; --warn-bg:#FCEFD6; --bad:#B42318; --bad-bg:#FDE7E4;
+  --shadow:0 1px 2px rgba(15,29,43,.06),0 4px 14px rgba(15,29,43,.05);
+  --display:'Bricolage Grotesque','Segoe UI',system-ui,sans-serif;
+  --body:'Figtree','Segoe UI',system-ui,sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0B141D; --surface:#121E2A; --ink:#E8EEF4; --muted:#93A3B3; --line:#223344;
+  --accent:#6B9CFF; --on-accent:#0B141D; --soft:#16263D;
+  --good:#4CC37D; --good-bg:#12301F; --warn:#E5A244; --warn-bg:#33270F; --bad:#F0877D; --bad-bg:#3A1A17;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 4px 14px rgba(0,0,0,.25); color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0B141D; --surface:#121E2A; --ink:#E8EEF4; --muted:#93A3B3; --line:#223344;
+  --accent:#6B9CFF; --on-accent:#0B141D; --soft:#16263D;
+  --good:#4CC37D; --good-bg:#12301F; --warn:#E5A244; --warn-bg:#33270F; --bad:#F0877D; --bad-bg:#3A1A17;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 4px 14px rgba(0,0,0,.25); color-scheme:dark}
+
+*,*::before,*::after{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:15px/1.5 var(--body);padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0;min-height:100vh}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);background:var(--surface);z-index:30}
+h1,h2,h3{font-family:var(--display);font-weight:700;line-height:1.15;margin:0;text-wrap:balance}
+h1{font-size:clamp(1.9rem,5vw,2.9rem);letter-spacing:-.02em}
+h2{font-size:1.35rem;letter-spacing:-.01em}
+h3{font-size:1.05rem}
+p{margin:0}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.wrap{max-width:1040px;margin-inline:auto}
+.muted{color:var(--muted)}
+.small{font-size:.85rem}
+.num{font-variant-numeric:tabular-nums}
+
+/* brand */
+.brand{display:flex;align-items:center;gap:8px;font-family:var(--display);font-weight:700;font-size:1.25rem;letter-spacing:-.01em}
+.brand .mark{width:30px;height:30px;border-radius:9px;background:var(--accent);color:var(--on-accent);display:grid;place-items:center}
+.brand.big{font-size:1.6rem}.brand.big .mark{width:38px;height:38px;border-radius:11px}
+
+/* top bar */
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--surface);border-bottom:1px solid var(--line);margin-inline:calc(-1*max(16px,env(safe-area-inset-left,0px)));padding-inline:max(16px,env(safe-area-inset-left,0px))}
+.bar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding-block:10px}
+.bar .grow{flex:1}
+.tabs{display:flex;gap:2px;overflow-x:auto;order:3;width:100%;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tab{background:none;border:0;padding:10px 12px;border-bottom:2px solid transparent;color:var(--muted);font-weight:500;cursor:pointer;white-space:nowrap;display:flex;gap:6px;align-items:center}
+.tab[aria-current="page"]{color:var(--ink);border-color:var(--accent)}
+.badge{background:var(--sun);color:var(--on-sun);border-radius:99px;font-size:.72rem;font-weight:600;min-width:18px;padding:0 6px;text-align:center}
+@media (min-width:760px){.tabs{order:0;width:auto;flex:1}}
+.rolepill{display:flex;align-items:center;gap:6px;border:1px solid var(--line);background:var(--bg);border-radius:99px;padding:6px 12px;cursor:pointer;font-weight:500;font-size:.88rem}
+.rolepill:hover{border-color:var(--accent)}
+
+/* controls */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:1px solid transparent;border-radius:10px;padding:9px 16px;font-weight:600;cursor:pointer;background:var(--accent);color:var(--on-accent);text-decoration:none}
+.btn:hover{filter:brightness(1.06)}
+.btn[disabled]{opacity:.45;cursor:not-allowed;filter:none}
+.btn.ghost{background:transparent;color:var(--ink);border-color:var(--line)}
+.btn.ghost:hover{border-color:var(--accent)}
+.btn.sun{background:var(--sun);color:var(--on-sun)}
+.btn.sm{padding:6px 12px;font-size:.88rem;border-radius:8px}
+.btn.danger{background:transparent;color:var(--bad);border-color:var(--line)}
+.linkbtn{background:none;border:0;padding:0;color:var(--accent);font-weight:600;cursor:pointer}
+.field{display:grid;gap:6px;min-width:0}
+.field label{font-weight:600;font-size:.88rem}
+.field input,.field select,.field textarea{width:100%;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+.field textarea{min-height:96px;resize:vertical}
+.field .err{color:var(--bad);font-size:.84rem}
+.field .hint{color:var(--muted);font-size:.84rem}
+.form{display:grid;gap:14px}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media (max-width:520px){.row2{grid-template-columns:1fr}}
+
+/* surfaces */
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:18px;box-shadow:var(--shadow);min-width:0}
+.chip{display:inline-block;font-size:.76rem;font-weight:600;border-radius:6px;padding:2px 8px;background:var(--soft);color:var(--accent)}
+.chip.ex{background:transparent;border:1px dashed var(--line);color:var(--muted)}
+.pill{display:inline-block;font-size:.78rem;font-weight:600;border-radius:99px;padding:2px 10px}
+.pill.warn{background:var(--warn-bg);color:var(--warn)}
+.pill.good{background:var(--good-bg);color:var(--good)}
+.pill.bad{background:var(--bad-bg);color:var(--bad)}
+.pill.muted{background:var(--bg);color:var(--muted);border:1px solid var(--line)}
+.pill.info{background:var(--soft);color:var(--accent)}
+.avatar{width:34px;height:34px;border-radius:50%;background:var(--soft);color:var(--accent);display:grid;place-items:center;font-weight:700;font-size:.8rem;flex:none}
+.who{display:flex;gap:10px;align-items:center;min-width:0}
+.who b,.who span{overflow-wrap:anywhere}
+
+/* auth */
+.auth{display:grid;grid-template-columns:1.1fr 1fr;gap:40px;align-items:center;padding-block:48px}
+@media (max-width:860px){.auth{grid-template-columns:1fr;gap:28px;padding-block:28px}}
+.pitch{display:grid;gap:18px;min-width:0}
+.lede{font-size:1.1rem;color:var(--muted);max-width:46ch}
+.flow{list-style:none;margin:6px 0 0;padding:0;display:grid;gap:10px;counter-reset:s}
+.flow li{counter-increment:s;display:flex;gap:12px;align-items:baseline}
+.flow li::before{content:counter(s);font-family:var(--display);font-weight:700;width:26px;height:26px;border-radius:50%;background:var(--sun);color:var(--on-sun);display:grid;place-items:center;flex:none;font-size:.85rem}
+.authcard{display:grid;gap:16px;padding:24px}
+.codebox{display:grid;gap:8px;padding:12px;border:1px solid var(--line);border-radius:12px;background:var(--bg)}
+.codebox.ok{border-color:var(--good);background:var(--good-bg)}
+.codebox .line{display:flex;gap:8px;align-items:end;flex-wrap:wrap}
+.codebox .line .field{flex:1;min-width:140px}
+.demo{font-size:.82rem;color:var(--muted);border-top:1px dashed var(--line);padding-top:12px}
+.democode{font-weight:700;letter-spacing:.12em;background:var(--sun);color:var(--on-sun);border-radius:6px;padding:1px 8px}
+.rolepick{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.rolepick button{text-align:left;background:var(--surface);border:1.5px solid var(--line);border-radius:12px;padding:14px;cursor:pointer;display:grid;gap:4px}
+.rolepick button[aria-pressed="true"]{border-color:var(--accent);background:var(--soft)}
+.rolepick b{font-family:var(--display);font-size:1.05rem}
+
+/* main */
+main{padding-block:24px 64px;display:grid;gap:20px}
+.head{display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--surface)}
+.seg button{border:0;background:none;padding:8px 16px;cursor:pointer;font-weight:600;color:var(--muted)}
+.seg button[aria-pressed="true"]{background:var(--accent);color:var(--on-accent)}
+.filters{display:flex;gap:10px;flex-wrap:wrap}
+.filters .field{flex:1;min-width:150px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,300px),1fr));gap:16px}
+.post{display:grid;gap:10px;align-content:start}
+.post .meta{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.post p.desc{color:var(--muted);display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.price{font-family:var(--display);font-weight:700;font-size:1.25rem}
+.actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.inline{border-top:1px solid var(--line);padding-top:14px;margin-top:4px}
+.empty{border:1.5px dashed var(--line);border-radius:14px;padding:28px;text-align:center;color:var(--muted)}
+.list{display:grid;gap:14px}
+.cover{white-space:pre-wrap;overflow-wrap:anywhere}
+
+/* payments */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
+.stat{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px;display:grid;gap:2px}
+.stat .v{font-family:var(--display);font-weight:700;font-size:1.6rem;font-variant-numeric:tabular-nums}
+.stat.hl{background:var(--sun);border-color:var(--sun);color:var(--on-sun)}
+.stat.hl .muted{color:var(--on-sun);opacity:.8}
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.steps i{height:6px;border-radius:3px;background:var(--line)}
+.steps i.on{background:var(--good)}
+.steplabels{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;font-size:.76rem;color:var(--muted)}
+table{width:100%;border-collapse:collapse;font-size:.9rem}
+th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);white-space:nowrap}
+th{color:var(--muted);font-weight:600;font-size:.8rem}
+.tablewrap{overflow-x:auto}
+.paynote{font-size:.82rem;color:var(--muted)}
+
+/* messages */
+.msgs{display:grid;grid-template-columns:280px 1fr;gap:16px;min-height:420px}
+.convs,.thread{background:var(--surface);border:1px solid var(--line);border-radius:14px;min-width:0;display:flex;flex-direction:column}
+.convs button{display:flex;gap:10px;align-items:center;text-align:left;background:none;border:0;border-bottom:1px solid var(--line);padding:12px 14px;cursor:pointer;width:100%}
+.convs button[aria-current="true"]{background:var(--soft)}
+.convs .last{color:var(--muted);font-size:.84rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.convs .txt{min-width:0}
+.log{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:8px;max-height:420px;min-height:260px}
+.bubble{max-width:80%;padding:8px 12px;border-radius:14px;background:var(--bg);overflow-wrap:anywhere}
+.bubble.me{align-self:flex-end;background:var(--accent);color:var(--on-accent)}
+.composer{display:flex;gap:8px;padding:12px;border-top:1px solid var(--line)}
+.composer input{flex:1;min-width:0;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+.thead{display:flex;gap:10px;align-items:center;padding:12px 14px;border-bottom:1px solid var(--line)}
+.back{display:none}
+@media (max-width:720px){
+  .msgs{grid-template-columns:1fr}
+  .msgs.has-thread .convs{display:none}
+  .msgs:not(.has-thread) .thread{display:none}
+  .back{display:inline-flex}
+}
+
+#toast{position:fixed;left:50%;bottom:calc(18px + env(safe-area-inset-bottom,0px));transform:translate(-50%,20px);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:10px;font-weight:500;opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;z-index:40;max-width:calc(100% - 32px);text-align:center}
+#toast.show{opacity:1;transform:translate(-50%,0)}
+@media (prefers-reduced-motion:reduce){#toast{transition:none}}
+</style>
+
+<div id="app"></div>
+<div id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(function(){
+'use strict';
+var KEY='jjup.v1';
+var CATS=['Development','Design','Writing & translation','Marketing','Video & audio','Other'];
+var FEE=0.10;
+
+/* ---------- helpers ---------- */
+function $(s){return document.querySelector(s)}
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
+function money(n){n=Math.round(n*100)/100;return '$'+n.toLocaleString('en-US',{minimumFractionDigits:Number.isInteger(n)?0:2,maximumFractionDigits:2})}
+function ago(ts){var m=Math.round((Date.now()-ts)/60000);if(m<1)return 'just now';if(m<60)return m+' min ago';var h=Math.round(m/60);if(h<24)return h+' h ago';return Math.round(h/24)+' d ago'}
+function uid(){return Math.random().toString(36).slice(2,9)}
+function code6(){return String(Math.floor(100000+Math.random()*900000))}
+function hash(s){var h1=0xdeadbeef,h2=0x41c6ce57;for(var i=0;i<s.length;i++){var c=s.charCodeAt(i);h1=Math.imul(h1^c,2654435761);h2=Math.imul(h2^c,1597334677)}h1=Math.imul(h1^(h1>>>16),2246822507)^Math.imul(h2^(h2>>>13),3266489909);h2=Math.imul(h2^(h2>>>16),2246822507)^Math.imul(h1^(h1>>>13),3266489909);return (4294967296*(2097151&h2)+(h1>>>0)).toString(36)}
+function initials(n){return String(n||'?').split(/\s+/).slice(0,2).map(function(w){return w[0]||''}).join('').toUpperCase()}
+function avatar(n){return '<span class="avatar" aria-hidden="true">'+esc(initials(n))+'</span>'}
+var toastT;
+function toast(m){var t=$('#toast');t.textContent=m;t.classList.add('show');clearTimeout(toastT);toastT=setTimeout(function(){t.classList.remove('show')},2800)}
+var ICON={
+ up:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20V5"/><path d="M5 11l7-7 7 7"/></svg>',
+ swap:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 4L3 8l4 4"/><path d="M3 8h14"/><path d="M17 20l4-4-4-4"/><path d="M21 16H7"/></svg>',
+ check:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5 9-10"/></svg>'
+};
+function logo(){return '<span class="mark">'+ICON.up+'</span>'}
+
+/* ---------- example people (counterparts for the demo) ---------- */
+var EX={
+ 'ex-hodan':{id:'ex-hodan',name:'Hodan Ali',role:'client',headline:'Runs a coffee roastery in Mogadishu'},
+ 'ex-farah':{id:'ex-farah',name:'Farah Noor',role:'client',headline:'Product lead at a mobile money startup'},
+ 'ex-abdi':{id:'ex-abdi',name:'Abdi Warsame',role:'freelancer',headline:'Full-stack developer, React and Node'},
+ 'ex-sagal':{id:'ex-sagal',name:'Sagal Yusuf',role:'freelancer',headline:'Brand and UI designer'}
+};
+function isEx(id){return String(id).indexOf('ex-')===0}
+
+function seed(){
+  var n=Date.now(),H=3600000;
+  return {v:1,me:null,users:[],proposals:[],messages:[],orders:[],tx:[],withdrawals:[],posts:[
+   {id:'p1',kind:'job',authorId:'ex-hodan',title:'Landing page for a coffee roastery',category:'Development',type:'fixed',amount:350,desc:'We roast and sell single-origin beans in Mogadishu. We need a one-page site with a product list, a WhatsApp order button, and text in Somali and English.',ts:n-5*H},
+   {id:'p2',kind:'job',authorId:'ex-farah',title:'Translate app strings from English to Somali',category:'Writing & translation',type:'hourly',amount:15,desc:'About 1,200 interface strings for a mobile money app. Plain, everyday Somali. Our team will give you a glossary of financial terms.',ts:n-26*H},
+   {id:'p3',kind:'job',authorId:'ex-hodan',title:'Logo and labels for three coffee bags',category:'Design',type:'fixed',amount:180,desc:'Three roast levels, one shared logo. Print-ready files for 250 g bags. We will share our colour ideas once we pick a designer.',ts:n-50*H},
+   {id:'p4',kind:'service',authorId:'ex-abdi',title:'I will build your React website',category:'Development',type:'fixed',amount:200,desc:'Responsive site with up to five pages, contact form, and basic SEO. Delivery in 7 days with one round of revisions.',ts:n-8*H},
+   {id:'p5',kind:'service',authorId:'ex-sagal',title:'Logo and brand kit in 5 days',category:'Design',type:'fixed',amount:120,desc:'Three logo directions, colour palette, and type pairing. You get SVG, PNG, and a one-page brand sheet.',ts:n-30*H},
+   {id:'p6',kind:'service',authorId:'ex-sagal',title:'12 social media post templates',category:'Marketing',type:'fixed',amount:60,desc:'Editable templates sized for Instagram and Facebook, matched to your colours and logo.',ts:n-70*H}
+  ]};
+}
+
+/* ---------- state ---------- */
+function load(){try{var r=localStorage.getItem(KEY);return r?JSON.parse(r):null}catch(e){return null}}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+var S=load()||seed();
+// Authentication is controlled by the backend session, not a remembered demo login.
+S.me=null;
+var U={mode:'signup',step:'signup',draft:null,codes:null,pendingEmail:'',ok:{gmail:false,phone:false},err:{},pickRole:null,
+       tab:'posts',kind:'job',q:'',cat:'',compose:false,proposeFor:null,thread:null};
+function me(){return S.users.filter(function(u){return u.id===S.me})[0]||null}
+function person(id){return EX[id]||S.users.filter(function(u){return u.id===id})[0]||{id:id,name:'Former user'}}
+function postById(id){return S.posts.filter(function(p){return p.id===id})[0]}
+
+/* ---------- simulated counterparts (no real people are contacted) ---------- */
+var sched={};
+function later(key,ms,fn){if(sched[key])return;sched[key]=1;setTimeout(function(){fn();save();render()},ms)}
+function addMsg(from,to,text){S.messages.push({id:uid(),from:from,to:to,text:text,ts:Date.now()})}
+function addBid(post,n){
+  if(post.closed)return;
+  var order=post.category==='Design'?['ex-sagal','ex-abdi']:['ex-abdi','ex-sagal'];
+  var fid=order[n],f=EX[fid];
+  var budget=post.amount*(post.type==='hourly'?20:1);
+  var price=Math.max(10,Math.round(budget*(n===0?0.9:1.1)/5)*5);
+  var covers=['I have done similar work and can start today. I will share a first draft in the first few days and adjust it with you.',
+              'I can take this on this week. Happy to answer questions before you decide.'];
+  S.proposals.push({id:uid(),postId:post.id,freelancerId:fid,clientId:post.authorId,cover:covers[n],price:price,days:n===0?6:9,status:'pending',ts:Date.now(),sim:true});
+  post.simBids=n+1;
+  toast(f.name+' sent a proposal');
+}
+function simulate(){
+  S.posts.forEach(function(p){
+    if(p.kind==='job'&&!isEx(p.authorId)&&!p.closed){
+      var n=p.simBids||0;
+      if(n<2)later('bid'+p.id+n,n===0?4500:9000,function(){var q=postById(p.id);if(q&&(q.simBids||0)===n)addBid(q,n)});
+    }
+  });
+  S.proposals.forEach(function(p){
+    if(p.status==='pending'&&isEx(p.clientId)&&!p.sim){
+      later('acc'+p.id,3500,function(){
+        var post=postById(p.postId);var budget=post?post.amount*(post.type==='hourly'?20:1):p.price;
+        if(p.price>budget*1.5){p.status='declined';addMsg(p.clientId,p.freelancerId,'Thanks for the proposal. The price is above our budget, so we will pass this time.');toast(person(p.clientId).name+' declined your proposal')}
+        else acceptProposal(p.id,true);
+      });
+    }
+  });
+  S.orders.forEach(function(o){
+    if(o.status==='awaiting_funding'&&isEx(o.clientId))later('fund'+o.id,3000,function(){fundOrder(o.id,'paypal',true)});
+    if(o.status==='funded'&&isEx(o.freelancerId))later('del'+o.id,3500,function(){deliverOrder(o.id,true)});
+    if(o.status==='delivered'&&isEx(o.clientId))later('rel'+o.id,3000,function(){releaseOrder(o.id,true)});
+  });
+  S.messages.forEach(function(m){
+    if(isEx(m.to)&&!isEx(m.from)&&!m.replied){
+      later('re'+m.id,2200,function(){
+        m.replied=1;var ex=EX[m.to];
+        var c=['Thanks for reaching out. Can you share a bit more about the project?','That works for me. Send a proposal and I will review it today.','Good to hear from you. I will take a look and get back to you soon.'];
+        var f=['Hi! Happy to help. What is your timeline?','Yes, I am free this week. Hire me from my offer and we can start.','Sure, I can do that. Send me the details.'];
+        addMsg(ex.id,m.from,(ex.role==='client'?c:f)[parseInt(hash(m.id).slice(-2),36)%3]);
+      });
+    }
+  });
+}
+
+/* ---------- order actions ---------- */
+function acceptProposal(id,sim){
+  var p=S.proposals.filter(function(x){return x.id===id})[0];if(!p||p.status!=='pending')return;
+  var post=postById(p.postId);p.status='accepted';
+  S.proposals.forEach(function(o){if(o.postId===p.postId&&o.id!==p.id&&o.status==='pending')o.status='closed'});
+  if(post)post.closed=true;
+  S.orders.push({id:uid(),title:post?post.title:'Job',clientId:p.clientId,freelancerId:p.freelancerId,amount:p.price,days:p.days,status:'awaiting_funding',ts:Date.now()});
+  if(sim){addMsg(p.clientId,p.freelancerId,'We accepted your proposal. Funding the order now.');toast(person(p.clientId).name+' accepted your proposal')}
+  else toast('Proposal accepted. Fund the order in Payments.');
+}
+function fundOrder(id,method,sim){
+  var o=S.orders.filter(function(x){return x.id===id})[0];if(!o||o.status!=='awaiting_funding')return;
+  o.status='funded';o.method=method;
+  S.tx.push({id:uid(),userId:o.clientId,type:'payment',amount:o.amount,method:method,orderId:o.id,title:o.title,ts:Date.now()});
+  toast(sim?person(o.clientId).name+' funded the order':'Payment held in escrow via '+(method==='paypal'?'PayPal':'Mastercard'));
+}
+function deliverOrder(id,sim){
+  var o=S.orders.filter(function(x){return x.id===id})[0];if(!o||o.status!=='funded')return;
+  o.status='delivered';toast(sim?person(o.freelancerId).name+' delivered the work':'Marked as delivered');
+}
+function releaseOrder(id,sim){
+  var o=S.orders.filter(function(x){return x.id===id})[0];if(!o||o.status!=='delivered')return;
+  o.status='released';var fee=Math.round(o.amount*FEE*100)/100;
+  S.tx.push({id:uid(),userId:o.freelancerId,type:'release',amount:Math.round((o.amount-fee)*100)/100,fee:fee,orderId:o.id,title:o.title,ts:Date.now()});
+  toast(sim?person(o.clientId).name+' released the payment':'Payment released to the freelancer');
+}
+function balance(uidv){
+  var earned=0,out=0,escrow=0;
+  S.tx.forEach(function(t){if(t.userId===uidv&&t.type==='release')earned+=t.amount});
+  S.withdrawals.forEach(function(w){if(w.userId===uidv)out+=w.amount});
+  S.orders.forEach(function(o){if(o.freelancerId===uidv&&(o.status==='funded'||o.status==='delivered'))escrow+=o.amount*(1-FEE)});
+  return {available:Math.round((earned-out)*100)/100,paidOut:out,escrow:escrow};
+}
+
+/* ---------- backend API ---------- */
+// Run the frontend at http://localhost:5500 and the API at http://localhost:4000.
+var API_BASE='http://localhost:4000/api';
+async function apiRequest(path, options){
+  options=options||{};
+  var response=await fetch(API_BASE+path,{
+    method:options.method||'GET',
+    credentials:'include',
+    headers:Object.assign({'Content-Type':'application/json'},options.headers||{}),
+    body:options.body===undefined?undefined:JSON.stringify(options.body)
+  });
+  var data=null;
+  try{data=await response.json()}catch(e){}
+  if(!response.ok){var error=new Error(data&&data.error?data.error:'Request failed. Please try again.');error.status=response.status;throw error}
+  return data;
+}
+function applyApiUser(user){
+  var local={id:user.id,name:user.name,gmail:user.email,phone:user.phone||'',verified:!!user.emailVerified,
+    role:user.role,headline:user.headline||'',skills:Array.isArray(user.skills)?user.skills.join(', '):(user.skills||'')};
+  var existing=S.users.findIndex(function(x){return x.id===local.id});
+  if(existing>=0)S.users[existing]=Object.assign({},S.users[existing],local);else S.users.push(local);
+  S.me=local.id;U.pickRole=local.role;U.kind=local.role==='client'?'job':'service';
+  save();
+}
+function showApiError(err, field){
+  U.err={};U.err[field||'auth']=err.message||'Something went wrong.';render();
+}
+
+/* ---------- views: auth ---------- */
+function authView(){
+  var u=me(),body;
+  if(u&&!u.role)body=roleStep();
+  else if(U.mode==='login')body=loginForm();
+  else if(U.step==='verify')body=verifyStep();
+  else body=signupForm();
+  return '<div class="auth wrap"><section class="pitch"><div class="brand big">'+logo()+'<span>Jj up</span></div>'+
+   '<h1>Hire talent. Get hired. Move up.</h1>'+
+   '<p class="lede">A marketplace where clients post jobs, freelancers send proposals, and money is held until the work is delivered.</p>'+
+   '<ol class="flow"><li>Clients post a job, or freelancers list a service</li><li>Freelancers send proposals and chat with the client</li><li>The client funds the order with PayPal or Mastercard</li><li>Payment is released when the work is delivered</li></ol></section>'+
+   '<section class="authcard card">'+body+'<p class="demo">Account registration and email verification use the Jj Up backend. Marketplace listings, messages, and payments may still be demo features.</p></section></div>';
+}
+function fld(id,label,type,ph,extra){
+  var e=U.err[id];
+  return '<div class="field"><label for="'+id+'">'+label+'</label><input id="'+id+'" type="'+type+'" placeholder="'+esc(ph||'')+'" '+(extra||'')+(e?' aria-invalid="true"':'')+'>'+(e?'<span class="err">'+esc(e)+'</span>':'')+'</div>';
+}
+function signupForm(){
+  return '<h2>Create your account</h2><form class="form" data-form="signup" novalidate>'+ 
+   fld('su-name','Full name','text','Your full name','autocomplete="name"')+
+   fld('su-gmail','Email address','email','you@example.com','autocomplete="email"')+
+   fld('su-phone','Phone number (optional)','tel','+252 61 555 0123','autocomplete="tel"')+
+   fld('su-pw','Password','password','At least 12 characters','autocomplete="new-password"')+
+   '<div class="field"><label for="su-role">I want to join as</label><select id="su-role" required><option value="freelancer">Freelancer — offer services</option><option value="client">Client — hire talent</option></select></div>'+
+   (U.err.auth?'<span class="err" style="color:var(--bad)">'+esc(U.err.auth)+'</span>':'')+
+   '<button class="btn" type="submit">Create account</button></form>'+ 
+   '<p class="small muted">Already have an account? <button class="linkbtn" data-act="mode-login">Log in</button></p>';
+}
+function loginForm(){
+  return '<h2>Log in</h2><form class="form" data-form="login" novalidate>'+ 
+   fld('li-gmail','Email address','email','you@example.com','autocomplete="email"')+
+   fld('li-pw','Password','password','','autocomplete="current-password"')+
+   (U.err.login?'<span class="err" style="color:var(--bad)">'+esc(U.err.login)+'</span>':'')+
+   '<button class="btn" type="submit">Log in</button></form>'+ 
+   '<p class="small muted">New here? <button class="linkbtn" data-act="mode-signup">Create an account</button></p>';
+}
+function verifyStep(){
+  return '<h2>Verify your email</h2><p class="muted">We sent a six-digit verification code to <b>'+esc(U.pendingEmail)+'</b>. Check your inbox and spam folder. The code expires in 10 minutes.</p>'+ 
+   '<form class="form" data-form="verify-email" novalidate>'+ 
+   '<div class="field"><label for="ve-code">6-digit verification code</label><input id="ve-code" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" autocomplete="one-time-code" placeholder="123456" required></div>'+ 
+   (U.err.verify?'<span class="err" style="color:var(--bad)">'+esc(U.err.verify)+'</span>':'')+
+   '<button class="btn" type="submit">Verify email</button></form>'+ 
+   '<p class="small muted"><button class="linkbtn" data-act="resend-code">Resend code</button> · <button class="linkbtn" data-act="edit-details">Back to sign up</button></p>';
+}
+function roleStep(){
+  var u=me(),r=U.pickRole;
+  return '<h2>Welcome, '+esc(u.name.split(' ')[0])+'</h2><p class="muted">Choose how you will use Jj up. You can switch later.</p>'+
+   '<div class="rolepick"><button data-act="pick-role" data-id="freelancer" aria-pressed="'+(r==='freelancer')+'"><b>Freelancer</b><span class="small muted">Offer services and send proposals</span></button>'+
+   '<button data-act="pick-role" data-id="client" aria-pressed="'+(r==='client')+'"><b>Client</b><span class="small muted">Post jobs and hire people</span></button></div>'+
+   '<form class="form" data-form="role" novalidate>'+
+   fld('rs-head',r==='client'?'What do you do?':'Your headline','text',r==='client'?'Runs a coffee roastery':'Full-stack developer')+
+   fld('rs-skills',r==='client'?'What do you hire for?':'Your skills','text',r==='client'?'Websites, design, translation':'React, Node, Somali and English')+
+   (U.err.role?'<span class="err" style="color:var(--bad)">'+esc(U.err.role)+'</span>':'')+
+   '<button class="btn" type="submit">Start using Jj up</button></form>';
+}
+
+/* ---------- views: app ---------- */
+function appView(){
+  var u=me();
+  var pend=u.role==='client'?S.proposals.filter(function(p){return p.clientId===u.id&&p.status==='pending'}).length:0;
+  var tabs=[['posts','Posts',0],['proposals','Proposals',pend],['messages','Messages',0],['payments','Payments',0],['profile','Profile',0]];
+  var v={posts:postsView,proposals:proposalsView,messages:messagesView,payments:paymentsView,profile:profileView}[U.tab]();
+  return '<header class="top"><div class="wrap bar"><div class="brand">'+logo()+'<span>Jj up</span></div><span class="grow"></span>'+
+   '<button class="rolepill" data-act="swap-role" aria-label="Switch role, currently '+u.role+'">'+ICON.swap+'<span>'+(u.role==='client'?'Client':'Freelancer')+'</span></button>'+
+   '<nav class="tabs" aria-label="Sections">'+tabs.map(function(t){return '<button class="tab" data-act="tab" data-id="'+t[0]+'"'+(U.tab===t[0]?' aria-current="page"':'')+'>'+t[1]+(t[2]?'<span class="badge">'+t[2]+'</span>':'')+'</button>'}).join('')+'</nav></div></header>'+
+   '<main class="wrap">'+v+'</main>';
+}
+
+function postsView(){
+  var u=me(),kind=U.kind,q=U.q.toLowerCase();
+  var list=S.posts.filter(function(p){return p.kind===kind&&(!U.cat||p.category===U.cat)&&(!q||(p.title+' '+p.desc).toLowerCase().indexOf(q)>-1)}).sort(function(a,b){return b.ts-a.ts});
+  var canPost=(kind==='job'&&u.role==='client')||(kind==='service'&&u.role==='freelancer');
+  var h='<div class="head"><div class="seg" role="group" aria-label="Post type"><button data-act="kind" data-id="job" aria-pressed="'+(kind==='job')+'">Jobs</button><button data-act="kind" data-id="service" aria-pressed="'+(kind==='service')+'">Services</button></div>'+
+   (canPost?'<button class="btn" data-act="compose">'+(U.compose?'Close':(kind==='job'?'Post a job':'Offer a service'))+'</button>':'<span class="small muted">'+(kind==='job'?'Switch to Client to post jobs':'Switch to Freelancer to offer services')+'</span>')+'</div>';
+  if(U.compose&&canPost)h+=composeForm(kind);
+  h+='<div class="filters"><div class="field"><label for="q">Search</label><input id="q" type="search" placeholder="Search '+(kind==='job'?'jobs':'services')+'" value="'+esc(U.q)+'"></div>'+
+   '<div class="field"><label for="cat">Category</label><select id="cat"><option value="">All categories</option>'+CATS.map(function(c){return '<option'+(U.cat===c?' selected':'')+'>'+esc(c)+'</option>'}).join('')+'</select></div></div>';
+  h+=list.length?'<div class="grid">'+list.map(postCard).join('')+'</div>':'<div class="empty">Nothing matches yet. '+(canPost?'Be the first to post.':'Try another search.')+'</div>';
+  return h;
+}
+function composeForm(kind){
+  var job=kind==='job';
+  return '<form class="card form" data-form="compose" novalidate><h3>'+(job?'Post a job':'Offer a service')+'</h3>'+
+   fld('cp-title',job?'What do you need done?':'What will you do?','text',job?'Landing page for my shop':'I will design your logo')+
+   '<div class="row2"><div class="field"><label for="cp-cat">Category</label><select id="cp-cat">'+CATS.map(function(c){return '<option>'+esc(c)+'</option>'}).join('')+'</select></div>'+
+   '<div class="field"><label for="cp-type">Pricing</label><select id="cp-type"><option value="fixed">Fixed price</option><option value="hourly">Hourly</option></select></div></div>'+
+   fld('cp-amount',job?'Budget (USD, per hour if hourly)':'Price (USD, per hour if hourly)','number','200','min="1" step="1" inputmode="decimal"')+
+   '<div class="field"><label for="cp-desc">Description</label><textarea id="cp-desc" placeholder="Describe the work, deliverables, and timing"></textarea>'+(U.err['cp-desc']?'<span class="err">'+esc(U.err['cp-desc'])+'</span>':'')+'</div>'+
+   '<button class="btn" type="submit">Publish</button></form>';
+}
+function postCard(p){
+  var u=me(),a=person(p.authorId),mine=p.authorId===u.id;
+  var props=S.proposals.filter(function(x){return x.postId===p.id});
+  var sent=props.filter(function(x){return x.freelancerId===u.id})[0];
+  var price=(p.kind==='service'?'From ':'')+money(p.amount)+(p.type==='hourly'?'/hr':'');
+  var act='';
+  if(mine)act='<span class="small muted">'+props.length+' proposal'+(props.length===1?'':'s')+'</span><button class="btn danger sm" data-act="del-post" data-id="'+p.id+'">Delete</button>';
+  else if(p.kind==='job'&&u.role==='freelancer')act=(sent?'<span class="pill info">Proposal sent</span>':(p.closed?'<span class="pill muted">Closed</span>':'<button class="btn sm" data-act="propose" data-id="'+p.id+'">'+(U.proposeFor===p.id?'Cancel':'Send proposal')+'</button>'))+'<button class="btn ghost sm" data-act="msg" data-id="'+p.authorId+'">Message</button>';
+  else if(p.kind==='service'&&u.role==='client')act='<button class="btn sm" data-act="hire" data-id="'+p.id+'">Hire for '+money(p.amount)+'</button><button class="btn ghost sm" data-act="msg" data-id="'+p.authorId+'">Message</button>';
+  else act='<button class="btn ghost sm" data-act="msg" data-id="'+p.authorId+'">Message</button>';
+  return '<article class="card post"><div class="meta"><span class="chip">'+esc(p.category)+'</span>'+(isEx(p.authorId)?'<span class="chip ex">Example</span>':'')+(p.closed?'<span class="pill muted">Closed</span>':'')+'</div>'+
+   '<h3>'+esc(p.title)+'</h3><p class="desc">'+esc(p.desc)+'</p><div class="price num">'+price+'</div>'+
+   '<div class="who">'+avatar(a.name)+'<div><b>'+esc(a.name)+'</b><div class="small muted">'+ago(p.ts)+'</div></div></div>'+
+   '<div class="actions">'+act+'</div>'+(U.proposeFor===p.id?proposalForm(p):'')+'</article>';
+}
+function proposalForm(p){
+  return '<form class="form inline" data-form="proposal" data-id="'+p.id+'" novalidate>'+
+   '<div class="field"><label for="pr-cover">Cover letter</label><textarea id="pr-cover" placeholder="Why you are the right person for this job"></textarea>'+(U.err['pr-cover']?'<span class="err">'+esc(U.err['pr-cover'])+'</span>':'')+'</div>'+
+   '<div class="row2">'+fld('pr-price','Total price (USD)','number',String(p.amount*(p.type==='hourly'?20:1)),'min="1" step="1" inputmode="decimal"')+fld('pr-days','Delivery (days)','number','7','min="1" step="1" inputmode="numeric"')+'</div>'+
+   '<button class="btn" type="submit">Send proposal</button></form>';
+}
+
+function statusPill(s){
+  var map={pending:['Pending','warn'],accepted:['Accepted','good'],declined:['Declined','bad'],closed:['Closed','muted'],awaiting_funding:['Awaiting funding','warn'],funded:['In escrow','good'],delivered:['Delivered','info'],released:['Paid','good']};
+  var m=map[s]||[s,'muted'];return '<span class="pill '+m[1]+'">'+m[0]+'</span>';
+}
+function proposalsView(){
+  var u=me(),client=u.role==='client';
+  var list=S.proposals.filter(function(p){return client?p.clientId===u.id:p.freelancerId===u.id}).sort(function(a,b){return b.ts-a.ts});
+  var h='<div class="head"><h2>'+(client?'Proposals on your jobs':'Proposals you sent')+'</h2></div>';
+  if(!list.length)return h+'<div class="empty">'+(client?'No proposals yet. Post a job in Posts and freelancers will respond.':'You have not sent a proposal. Open a job in Posts and choose Send proposal.')+'</div>';
+  return h+'<div class="list">'+list.map(function(p){
+    var post=postById(p.postId),other=person(client?p.freelancerId:p.clientId);
+    var act='';
+    if(client&&p.status==='pending')act='<button class="btn sm" data-act="accept" data-id="'+p.id+'">Accept</button><button class="btn ghost sm" data-act="decline" data-id="'+p.id+'">Decline</button>';
+    if(p.status==='accepted')act+='<button class="btn sm" data-act="tab" data-id="payments">Go to Payments</button>';
+    act+='<button class="btn ghost sm" data-act="msg" data-id="'+other.id+'">Message</button>';
+    return '<article class="card"><div class="head"><div class="who">'+avatar(other.name)+'<div><b>'+esc(other.name)+'</b><div class="small muted">for '+esc(post?post.title:'a removed post')+' · '+ago(p.ts)+'</div></div></div>'+statusPill(p.status)+'</div>'+
+     '<p class="cover" style="margin:12px 0">'+esc(p.cover)+'</p><div class="head"><div class="price num">'+money(p.price)+' <span class="small muted" style="font-family:var(--body);font-weight:400">in '+p.days+' days</span></div><div class="actions">'+act+'</div></div></article>';
+  }).join('')+'</div>';
+}
+
+function threadsFor(uidv){
+  var map={};
+  S.messages.forEach(function(m){if(m.from===uidv||m.to===uidv){var o=m.from===uidv?m.to:m.from;if(!map[o]||map[o].ts<m.ts)map[o]=m}});
+  if(U.thread&&!map[U.thread])map[U.thread]={ts:Date.now(),text:'',from:uidv,to:U.thread};
+  return Object.keys(map).map(function(k){return {id:k,last:map[k]}}).sort(function(a,b){return b.last.ts-a.last.ts});
+}
+function messagesView(){
+  var u=me(),th=threadsFor(u.id),cur=U.thread;
+  var h='<div class="head"><h2>Messages</h2></div>';
+  var convs='<div class="convs">'+(th.length?th.map(function(t){var p=person(t.id);return '<button data-act="open-thread" data-id="'+t.id+'"'+(cur===t.id?' aria-current="true"':'')+'>'+avatar(p.name)+'<span class="txt"><b>'+esc(p.name)+'</b><div class="last">'+esc(t.last.text||'New conversation')+'</div></span></button>'}).join(''):'<div class="empty" style="margin:14px">No conversations yet. Use Message on any post.</div>')+'</div>';
+  var pane='<div class="thread">';
+  if(cur){
+    var p=person(cur),msgs=S.messages.filter(function(m){return (m.from===u.id&&m.to===cur)||(m.from===cur&&m.to===u.id)}).sort(function(a,b){return a.ts-b.ts});
+    pane+='<div class="thead"><button class="btn ghost sm back" data-act="back-thread">Back</button>'+avatar(p.name)+'<div><b>'+esc(p.name)+'</b><div class="small muted">'+esc(p.headline||'')+'</div></div></div>'+
+     '<div class="log" id="log">'+(msgs.length?msgs.map(function(m){return '<div class="bubble'+(m.from===u.id?' me':'')+'">'+esc(m.text)+'</div>'}).join(''):'<div class="muted small">Say hello to '+esc(p.name.split(' ')[0])+'.</div>')+'</div>'+
+     '<form class="composer" data-form="message" novalidate><input id="msg-input" placeholder="Write a message" autocomplete="off" aria-label="Message"><button class="btn" type="submit">Send</button></form>';
+  } else pane+='<div class="empty" style="margin:14px">Select a conversation.</div>';
+  pane+='</div>';
+  return h+'<div class="msgs'+(cur?' has-thread':'')+'">'+convs+pane+'</div>';
+}
+
+var STEP={awaiting_funding:0,funded:1,delivered:2,released:3};
+function paymentsView(){
+  var u=me(),client=u.role==='client';
+  var orders=S.orders.filter(function(o){return client?o.clientId===u.id:o.freelancerId===u.id}).sort(function(a,b){return b.ts-a.ts});
+  var h='<div class="head"><h2>Payments</h2></div>',stats;
+  if(client){
+    var spent=0,esc2=0,wait=0;
+    S.tx.forEach(function(t){if(t.userId===u.id&&t.type==='payment')spent+=t.amount});
+    orders.forEach(function(o){if(o.status==='funded'||o.status==='delivered')esc2+=o.amount;if(o.status==='awaiting_funding')wait+=o.amount});
+    stats='<div class="stats"><div class="stat"><span class="muted small">Total paid in</span><span class="v">'+money(spent)+'</span></div><div class="stat"><span class="muted small">Held in escrow</span><span class="v">'+money(esc2)+'</span></div><div class="stat"><span class="muted small">Awaiting funding</span><span class="v">'+money(wait)+'</span></div></div>';
+  } else {
+    var b=balance(u.id);
+    stats='<div class="stats"><div class="stat hl"><span class="muted small">Available to withdraw</span><span class="v">'+money(b.available)+'</span></div><div class="stat"><span class="muted small">In escrow (after fee)</span><span class="v">'+money(b.escrow)+'</span></div><div class="stat"><span class="muted small">Withdrawn</span><span class="v">'+money(b.paidOut)+'</span></div></div>'+
+     '<div class="card form"><h3>Withdraw</h3><p class="paynote">Test mode. No real money moves.</p><div class="actions"><button class="btn" data-act="withdraw" data-method="paypal"'+(b.available>0?'':' disabled')+'>Withdraw to PayPal</button><button class="btn ghost" data-act="withdraw" data-method="mastercard"'+(b.available>0?'':' disabled')+'>Withdraw to Mastercard</button></div></div>';
+  }
+  h+=stats+'<h3>Orders</h3>';
+  h+=orders.length?'<div class="list">'+orders.map(function(o){return orderCard(o,client)}).join('')+'</div>':'<div class="empty">'+(client?'No orders yet. Accept a proposal or hire from a service.':'No orders yet. Orders appear when a client accepts your proposal or hires you.')+'</div>';
+  var tx=S.tx.filter(function(t){return t.userId===u.id}).concat(S.withdrawals.filter(function(w){return w.userId===u.id}).map(function(w){return {id:w.id,type:'withdrawal',amount:w.amount,method:w.method,title:'Withdrawal',ts:w.ts}})).sort(function(a,b){return b.ts-a.ts});
+  if(tx.length){
+    h+='<h3>History</h3><div class="card tablewrap" style="padding:6px"><table><thead><tr><th>When</th><th>Type</th><th>Details</th><th>Method</th><th style="text-align:right">Amount</th></tr></thead><tbody>'+tx.map(function(t){
+      var lab=t.type==='payment'?'Paid into escrow':t.type==='release'?'Payout (fee '+money(t.fee)+')':'Withdrawal';
+      return '<tr><td>'+ago(t.ts)+'</td><td>'+lab+'</td><td>'+esc(t.title||'')+'</td><td>'+(t.method==='paypal'?'PayPal':t.method==='mastercard'?'Mastercard':'Escrow')+'</td><td class="num" style="text-align:right">'+(t.type==='payment'||t.type==='withdrawal'?'−':'+')+money(t.amount)+'</td></tr>';
+    }).join('')+'</tbody></table></div>';
+  }
+  return h;
+}
+function orderCard(o,client){
+  var other=person(client?o.freelancerId:o.clientId),st=STEP[o.status],act='';
+  if(client&&o.status==='awaiting_funding')act='<button class="btn" data-act="fund" data-id="'+o.id+'" data-method="paypal">Pay with PayPal</button><button class="btn ghost" data-act="fund" data-id="'+o.id+'" data-method="mastercard">Pay with Mastercard</button>';
+  else if(client&&o.status==='delivered')act='<button class="btn sun" data-act="release" data-id="'+o.id+'">Release payment</button>';
+  else if(!client&&o.status==='funded')act='<button class="btn" data-act="deliver" data-id="'+o.id+'">Mark as delivered</button>';
+  else if(o.status==='awaiting_funding')act='<span class="small muted">Waiting for '+esc(other.name)+' to fund</span>';
+  else if(o.status==='funded'&&client)act='<span class="small muted">Waiting for '+esc(other.name)+' to deliver</span>';
+  else if(o.status==='delivered'&&!client)act='<span class="small muted">Waiting for '+esc(other.name)+' to release payment</span>';
+  else if(o.status==='released')act='<span class="small muted">'+(client?'Completed':'You received '+money(o.amount*(1-FEE))+' after the '+Math.round(FEE*100)+'% fee')+'</span>';
+  return '<article class="card"><div class="head"><div><h3>'+esc(o.title)+'</h3><div class="small muted">with '+esc(other.name)+' · '+o.days+' days</div></div><div style="text-align:right"><div class="price num">'+money(o.amount)+'</div>'+statusPill(o.status)+'</div></div>'+
+   '<div class="steps" style="margin:14px 0 4px" aria-hidden="true"><i class="'+(st>=1?'on':'')+'"></i><i class="'+(st>=2?'on':'')+'"></i><i class="'+(st>=3?'on':'')+'"></i></div><div class="steplabels"><span>Funded</span><span>Delivered</span><span>Paid</span></div>'+
+   '<div class="actions" style="margin-top:12px">'+act+'</div>'+(client&&o.status==='awaiting_funding'?'<p class="paynote" style="margin-top:8px">Test mode. No card details are asked for and no money moves.</p>':'')+'</article>';
+}
+
+function profileView(){
+  var u=me();
+  return '<div class="head"><h2>Profile</h2></div><div class="card form"><div class="who">'+avatar(u.name)+'<div><b>'+esc(u.name)+'</b><div class="small muted">'+(u.role==='client'?'Client':'Freelancer')+'</div></div></div>'+
+   '<div class="row2"><div><div class="small muted">Gmail</div><div>'+esc(u.gmail)+' <span class="pill good">Verified</span></div></div><div><div class="small muted">Phone</div><div>'+esc(u.phone)+' <span class="pill good">Verified</span></div></div></div>'+
+   '<form class="form" data-form="profile" novalidate><div class="field"><label for="pf-head">Headline</label><input id="pf-head" value="'+esc(u.headline||'')+'"></div><div class="field"><label for="pf-skills">'+(u.role==='client'?'What you hire for':'Skills')+'</label><input id="pf-skills" value="'+esc(u.skills||'')+'"></div><div class="actions"><button class="btn" type="submit">Save profile</button></div></form></div>'+
+   '<div class="actions"><button class="btn ghost" data-act="logout">Log out</button><button class="btn danger" data-act="reset">Reset demo data</button></div>';
+}
+
+/* ---------- render ---------- */
+function snap(){
+  var o={};document.querySelectorAll('#app input[id],#app textarea[id],#app select[id]').forEach(function(el){o[el.id]=el.value});
+  var f=document.activeElement;
+  return {vals:o,focus:f&&f.id?f.id:null,s:f&&f.selectionStart,e:f&&f.selectionEnd,y:window.scrollY};
+}
+function restore(s){
+  Object.keys(s.vals).forEach(function(id){var el=document.getElementById(id);if(el&&el.value!==s.vals[id])el.value=s.vals[id]});
+  if(s.focus){var f=document.getElementById(s.focus);if(f){f.focus({preventScroll:true});try{f.setSelectionRange(s.s,s.e)}catch(_){}}}
+  window.scrollTo(0,s.y);
+}
+function render(){
+  var s=snap(),u=me();
+  $('#app').innerHTML=(u&&u.role)?appView():authView();
+  restore(s);
+  var log=document.getElementById('log');if(log)log.scrollTop=log.scrollHeight;
+  simulate();
+}
+
+/* ---------- actions ---------- */
+function val(id){var el=document.getElementById(id);return el?el.value.trim():''}
+var act={
+ tab:function(id){U.tab=id;U.compose=false;U.proposeFor=null;render();window.scrollTo(0,0)},
+ kind:function(id){U.kind=id;U.compose=false;U.proposeFor=null;render()},
+ compose:function(){U.compose=!U.compose;U.err={};render()},
+ propose:function(id){U.proposeFor=U.proposeFor===id?null:id;U.err={};render()},
+ 'del-post':function(id){S.posts=S.posts.filter(function(p){return p.id!==id});S.proposals=S.proposals.filter(function(p){return p.postId!==id});save();render();toast('Post deleted')},
+ msg:function(id){U.thread=id;U.tab='messages';render();window.scrollTo(0,0)},
+ 'open-thread':function(id){U.thread=id;render()},
+ 'back-thread':function(){U.thread=null;render()},
+ hire:function(id){
+  var p=postById(id),u=me();if(!p)return;
+  S.orders.push({id:uid(),title:p.title,clientId:u.id,freelancerId:p.authorId,amount:p.amount,days:7,status:'awaiting_funding',ts:Date.now()});
+  U.tab='payments';save();render();window.scrollTo(0,0);toast('Order created. Fund it to start.');
+ },
+ accept:function(id){acceptProposal(id,false);save();render()},
+ decline:function(id){var p=S.proposals.filter(function(x){return x.id===id})[0];if(p){p.status='declined';save();render();toast('Proposal declined')}},
+ fund:function(id,b){fundOrder(id,b.dataset.method,false);save();render()},
+ deliver:function(id){deliverOrder(id,false);save();render()},
+ release:function(id){releaseOrder(id,false);save();render()},
+ withdraw:function(id,b){
+  var u=me(),bal=balance(u.id);if(bal.available<=0)return;
+  S.withdrawals.push({id:uid(),userId:u.id,amount:bal.available,method:b.dataset.method,ts:Date.now()});
+  save();render();toast('Withdrawal of '+money(bal.available)+' started (test mode)');
+ },
+ 'swap-role':function(){var u=me();u.role=u.role==='client'?'freelancer':'client';U.compose=false;U.proposeFor=null;if(U.tab==='posts')U.kind=u.role==='client'?'job':'service';save();render();toast('Now viewing as '+(u.role==='client'?'Client':'Freelancer'))},
+ logout:async function(){try{await apiRequest('/auth/logout',{method:'POST'})}catch(e){}S.me=null;U.mode='login';U.step='signup';U.err={};save();render();window.scrollTo(0,0)},
+ reset:function(){try{localStorage.removeItem(KEY)}catch(e){}S=seed();U.mode='signup';U.step='signup';U.tab='posts';U.thread=null;U.err={};sched={};render();window.scrollTo(0,0)},
+ 'mode-login':function(){U.mode='login';U.err={};render()},
+ 'mode-signup':function(){U.mode='signup';U.err={};render()},
+ 'edit-details':function(){U.step='signup';U.mode='signup';U.err={};render()},
+ 'resend-code':async function(){try{var r=await apiRequest('/auth/resend-code',{method:'POST',body:{email:U.pendingEmail}});U.err={verify:r.message||'If your account needs verification, a code will be sent.'};render()}catch(e){U.err={verify:e.message};render()}},
+ 'pick-role':function(id){U.pickRole=id;U.err={};render()},
+ create:function(){},
+};
+var forms={
+ signup:async function(){
+  var name=val('su-name'),email=val('su-gmail').toLowerCase(),phone=val('su-phone'),password=document.getElementById('su-pw').value,role=val('su-role');
+  U.err={};
+  if(name.length<2)U.err['su-name']='Enter your full name.';
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))U.err['su-gmail']='Enter a valid email address.';
+  if(password.length<12)U.err['su-pw']='Use at least 12 characters.';
+  if(Object.keys(U.err).length){render();return}
+  var button=document.querySelector('[data-form="signup"] button[type="submit"]');if(button){button.disabled=true;button.textContent='Creating account…'}
+  try{
+    await apiRequest('/auth/signup',{method:'POST',body:{name:name,email:email,phone:phone,password:password,role:role}});
+    U.pendingEmail=email;U.step='verify';U.mode='signup';U.err={};render();
+  }catch(e){U.err={auth:e.message};render()}
+ },
+ login:async function(){
+  var email=val('li-gmail').toLowerCase(),password=document.getElementById('li-pw').value;
+  U.err={};
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)||!password){U.err.login='Enter a valid email address and password.';render();return}
+  try{
+    var result=await apiRequest('/auth/login',{method:'POST',body:{email:email,password:password}});
+    applyApiUser(result.user);U.mode='login';U.step='signup';U.err={};render();window.scrollTo(0,0);
+  }catch(e){
+    if(e.status===403){U.pendingEmail=email;try{await apiRequest('/auth/resend-code',{method:'POST',body:{email:email}});U.step='verify';U.mode='signup';U.err={verify:'Your email is not verified. Check your email for a code.'};render();return}catch(resendError){U.err={login:resendError.message};render();return}}
+    U.err={login:e.message};render();
+  }
+ },
+ 'verify-email':async function(){
+  var code=val('ve-code');if(!/^\d{6}$/.test(code)){U.err={verify:'Enter the six-digit code from your email.'};render();return}
+  try{
+    var result=await apiRequest('/auth/verify-email',{method:'POST',body:{email:U.pendingEmail,code:code}});
+    applyApiUser(result.user);U.step='signup';U.mode='login';U.err={};render();window.scrollTo(0,0);
+  }catch(e){U.err={verify:e.message};render()}
+ },
+ 'verify-gmail':function(){verifyKind('gmail')},
+ 'verify-phone':function(){verifyKind('phone')},
+ role:function(){
+  if(!U.pickRole){U.err={role:'Choose Freelancer or Client first.'};render();return}
+  var u=me();u.role=U.pickRole;u.headline=val('rs-head');u.skills=val('rs-skills');
+  U.kind=u.role==='client'?'job':'service';U.tab='posts';U.err={};save();render();window.scrollTo(0,0);
+ },
+ compose:function(){
+  var u=me(),t=val('cp-title'),a=parseFloat(val('cp-amount')),d=val('cp-desc'),e={};
+  if(t.length<5)e['cp-title']='Write a title of at least 5 characters.';
+  if(!(a>0))e['cp-amount']='Enter an amount above 0.';
+  if(d.length<20)e['cp-desc']='Describe the work in at least 20 characters.';
+  U.err=e;if(Object.keys(e).length){render();return}
+  S.posts.push({id:uid(),kind:U.kind,authorId:u.id,title:t,category:val('cp-cat'),type:val('cp-type'),amount:a,desc:d,ts:Date.now()});
+  U.compose=false;U.err={};['cp-title','cp-amount','cp-desc'].forEach(function(i){var el=document.getElementById(i);if(el)el.value=''});
+  save();render();toast(U.kind==='job'?'Job posted. Proposals will arrive shortly.':'Service published');
+ },
+ proposal:function(f){
+  var u=me(),pid=f.dataset.id,post=postById(pid),c=val('pr-cover'),price=parseFloat(val('pr-price')),days=parseInt(val('pr-days'),10),e={};
+  if(c.length<20)e['pr-cover']='Write at least 20 characters.';
+  if(!(price>0))e['pr-price']='Enter a price above 0.';
+  if(!(days>0))e['pr-days']='Enter the number of days.';
+  U.err=e;if(Object.keys(e).length){render();return}
+  S.proposals.push({id:uid(),postId:pid,freelancerId:u.id,clientId:post.authorId,cover:c,price:price,days:days,status:'pending',ts:Date.now()});
+  ['pr-cover','pr-price','pr-days'].forEach(function(i){var el=document.getElementById(i);if(el)el.value=''});
+  U.proposeFor=null;U.err={};save();render();toast('Proposal sent');
+ },
+ message:function(){
+  var u=me(),t=val('msg-input');if(!t||!U.thread)return;
+  addMsg(u.id,U.thread,t);document.getElementById('msg-input').value='';save();render();
+ },
+ profile:function(){var u=me();u.headline=val('pf-head');u.skills=val('pf-skills');save();render();toast('Profile saved')}
+};
+function verifyKind(k){
+  var v=val('vc-'+k);
+  if(v===U.codes[k]){U.ok[k]=true;delete U.err['vc-'+k]}else U.err['vc-'+k]='That code does not match. Check the demo code above.';
+  render();
+}
+
+document.addEventListener('click',function(e){
+  var b=e.target.closest('[data-act]');if(!b)return;
+  var f=act[b.dataset.act];if(f)f(b.dataset.id,b);
+});
+document.addEventListener('submit',function(e){
+  e.preventDefault();var f=e.target,h=forms[f.dataset.form];if(h)h(f);
+});
+document.addEventListener('input',function(e){
+  if(e.target.id==='q'){U.q=e.target.value;render()}
+});
+document.addEventListener('change',function(e){
+  if(e.target.id==='cat'){U.cat=e.target.value;render()}
+});
+
+if(me()&&me().role)U.kind=me().role==='client'?'job':'service';
+render();
+// Restore the backend session on refresh. If no session exists, the public auth view remains available.
+apiRequest('/auth/me').then(function(result){applyApiUser(result.user);render()}).catch(function(){});
+})();
+</script>
+
+</body></html>

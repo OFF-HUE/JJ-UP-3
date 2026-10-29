@@ -1,0 +1,26 @@
+# Render.com example (needs a paid web service because it uses a persistent disk).
+services:
+  - type: web
+    name: jjup
+    runtime: docker
+    plan: starter
+    healthCheckPath: /api/config
+    disk:
+      name: jjup-data
+      mountPath: /data
+      sizeGB: 1
+    envVars:
+      - { key: NODE_ENV, value: production }
+      - { key: TRUST_PROXY, value: "1" }
+      - { key: DB_PATH, value: /data/jjup.db }
+      - { key: APP_URL, value: https://YOUR-DOMAIN }
+      - { key: PAYPAL_MODE, value: sandbox }
+      - { key: PAYPAL_CLIENT_ID, sync: false }
+      - { key: PAYPAL_SECRET, sync: false }
+      - { key: PAYPAL_WEBHOOK_ID, sync: false }
+      - { key: SMTP_HOST, sync: false }
+      - { key: SMTP_USER, sync: false }
+      - { key: SMTP_PASS, sync: false }
+      - { key: MAIL_FROM, sync: false }
+      - { key: ADMIN_EMAIL, sync: false }
+      - { key: ADMIN_PASSWORD, sync: false }
